@@ -21,27 +21,23 @@ class SystemTemporaryStorage implements StorageRepository
         $this->path = sys_get_temp_dir().DIRECTORY_SEPARATOR.$prefix.$hash;
     }
 
-    
     /**
      * Store the given data.
      *
-     * @param  string  $key
      * @param  mixed  $data
-     * @return void
      */
     public function store(string $key, $data): void
     {
         if (is_array($data) || is_object($data)) {
             $data = serialize($data);
         }
-        
+
         $this->write($key, $data);
     }
 
     /**
      * Retrieve the data from the given key.
      *
-     * @param  string  $key
      * @return string|null
      */
     public function retrieve(string $key)
@@ -64,9 +60,6 @@ class SystemTemporaryStorage implements StorageRepository
 
     /**
      * Check if the given key exists.
-     *
-     * @param  string  $key
-     * @return bool
      */
     public function exists(string $key): bool
     {
@@ -75,15 +68,11 @@ class SystemTemporaryStorage implements StorageRepository
 
     /**
      * Remove the given key.
-     *
-     * @param  string  $key
-     * @return void
      */
     public function remove(string $key): void
     {
         $this->write($key, null);
     }
-
 
     /**
      * Read the value of the given key.
@@ -100,7 +89,6 @@ class SystemTemporaryStorage implements StorageRepository
 
         return @file_get_contents($path);
     }
-
 
     /**
      * Write the value of the given key.
@@ -125,7 +113,6 @@ class SystemTemporaryStorage implements StorageRepository
 
         file_put_contents($path, $value);
     }
-
 
     /**
      * Delete the given directory.

@@ -2,15 +2,11 @@
 
 namespace Farzai\Viola\Storage;
 
-use Farzai\Viola\Contracts\TokenRepository as TokenRepositoryContract;
 use Farzai\Viola\Contracts\StorageRepository as StorageRepositoryContract;
-use Farzai\Viola\Storage\SystemTemporaryStorage;
+use Farzai\Viola\Contracts\TokenRepository as TokenRepositoryContract;
 
 class AccessTokenRepository implements TokenRepositoryContract
 {
-    /**
-     * @var SystemTemporaryStorage
-     */
     private SystemTemporaryStorage $storage;
 
     /**
@@ -33,9 +29,6 @@ class AccessTokenRepository implements TokenRepositoryContract
 
     /**
      * Set the ChatGPT API token.
-     *
-     * @param string $token
-     * @return void
      */
     public function setToken(string $token): void
     {
@@ -44,8 +37,6 @@ class AccessTokenRepository implements TokenRepositoryContract
 
     /**
      * Forget API token.
-     *
-     * @return void
      */
     public function forget(): void
     {

@@ -2,13 +2,12 @@
 
 namespace Farzai\Viola\Commands;
 
+use Farzai\Viola\Viola;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
-use Farzai\Viola\Viola;
 
 class AskQuestion extends Command
 {
@@ -33,7 +32,7 @@ class AskQuestion extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $question = $input->getArgument('question');
-        
+
         // if ($this->viola->getTokenStore()->getToken() === null) {
         //     $accessToken = $this->ask(' API Token', $input, $output);
 

@@ -4,11 +4,10 @@ namespace Farzai\Viola\Actors;
 
 use Farzai\Viola\Contracts\Actor as ActorContract;
 use Farzai\Viola\Contracts\Database\Connection;
-use Farzai\Viola\Contracts\Database\Connector;
 
 class DatabaseAdministrator implements ActorContract
 {
-    public static $prompt = "
+    public static $prompt = '
         I want you to act as a Database Administrator.
         The database contains tables named [tables].
         I will type questions and you will reply with SQL queries.
@@ -16,8 +15,7 @@ class DatabaseAdministrator implements ActorContract
         Do not type commands unless I instruct you to do so. 
         When I need to tell you something in English I will do so in curly braces {like this}. 
         My first command is ‘Show me all products’
-    ";
-
+    ';
 
     /**
      * @var \Farzai\Viola\Contracts\Database\Connection
@@ -26,8 +24,6 @@ class DatabaseAdministrator implements ActorContract
 
     /**
      * DatabaseAdministrator constructor.
-     *
-     * @param \Farzai\Viola\Contracts\Database\Connection $connection
      */
     public function __construct(Connection $connection)
     {
@@ -36,8 +32,6 @@ class DatabaseAdministrator implements ActorContract
 
     /**
      * Get the prompt for the actor.
-     *
-     * @return string
      */
     public function getPrompt(): string
     {
@@ -46,9 +40,6 @@ class DatabaseAdministrator implements ActorContract
 
     /**
      * Handle the command.
-     *
-     * @param string $command
-     * @return string
      */
     public function handle(string $command): string
     {
@@ -57,8 +48,6 @@ class DatabaseAdministrator implements ActorContract
 
     /**
      * Get the identifier for the actor.
-     *
-     * @return string
      */
     public function getIdentifier(): string
     {

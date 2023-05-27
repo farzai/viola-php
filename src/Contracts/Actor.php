@@ -2,7 +2,6 @@
 
 namespace Farzai\Viola\Contracts;
 
-
 interface Actor
 {
     public function handle(string $command);
