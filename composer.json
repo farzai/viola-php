@@ -1,46 +1,70 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "farzai/viola-cli",
+    "description": "Viola CLI is a command line tool for asking questions with ChatGPT.",
     "keywords": [
-        ":vendor_name",
-        ":package_slug"
+        "farzai",
+        "viola-cli",
+        "viola",
+        "chat-gpt",
+        "chatgpt",
+        "openai",
+        "gpt3",
+        "gpt-3",
+        "gpt",
+        "ai",
+        "bot"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/farzai/viola-php",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
-            "role": "Developer"
+            "name": "parsilver",
+            "email": "parkorn@farzai.com"
         }
     ],
     "require": {
-        "php": "^8.1"
+        "php": "^8.1",
+        "guzzlehttp/guzzle": "^7.7",
+        "openai-php/client": "^0.4.2",
+        "psr/http-client": "^1.0.2",
+        "psr/http-factory": "^1.0.2",
+        "symfony/console": "^6.2",
+        "symfony/dependency-injection": "^5.4.21|^6.2.10",
+        "symfony/http-client": "^5.4.21|^6.2.10"
     },
     "require-dev": {
-        :require_dev_testing,
-        :require_dev_codestyle,
-        "spatie/ray": "^1.28"
+        "pestphp/pest": "^1.20",
+        "laravel/pint": "^1.2",
+        "spatie/ray": "^1.28",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan-deprecation-rules": "^1.0",
+        "phpstan/phpstan-phpunit": "^1.0"
     },
+    "bin": [
+        "bin/viola"
+    ],
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src"
+            "Farzai\\Viola\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "Farzai\\Viola\\Tests\\": "tests"
         }
     },
     "scripts": {
-        :scripts_testing,
-        :scripts_codestyle
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse"
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            :plugins_testing,
-            "phpstan/extension-installer": true
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true,
+            "php-http/discovery": true
         }
     },
     "minimum-stability": "dev",
