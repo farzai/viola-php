@@ -22,25 +22,63 @@ $ composer global require farzai/viola
 
 ## Usage
 
+First, you need to set your OpenAI key and Database Connection.
 ```bash
-$ viola ask "YOUR QUESTION"
+$ viola config
 
-# Example
-$ viola ask "Show me who is admin in my company"
+# API Key: <your-openai-key>
+# Database Connection name: <your-connection-name>
+# Choose database driver: <mysql|pgsql|sqlsrv>
+# Enter database host, port, database name, username, password
 ```
 
-Response:
-```text
-Your admin in company:
-
-+---------------+
-| name          |
-+---------------+
-| Pravit        |
-+---------------+
-| Prayut        |
-+---------------+
+Then, you can try to ask a question to ChatGPT.
+```bash
+$ viola ask "Show me all books by J. K. Rowling."
 ```
+
+```bash
+Here, I found 2 books by J. K. Rowling:
+
+|----|------------------------------------------|---------------|------|
+| id | title                                    | author        | year |
+|----|------------------------------------------|---------------|------|
+| 1  | Harry Potter and the Philosopher's Stone | J. K. Rowling | 1997 |
+| 2  | Harry Potter and the Chamber of Secrets  | J. K. Rowling | 1998 |
+|----|------------------------------------------|---------------|------|
+```
+
+
+## Commands
+
+```bash
+# Ask a question to ChatGPT.
+$ viola ask "<your-question>"
+```
+
+```bash
+# Set your OpenAI key and Database Connection.
+$ viola config
+```
+
+```bash
+# Show all database connections.
+$ viola config:show
+```
+
+```bash
+# Change current connection
+$ viola use <connection-name>
+```
+
+```bash
+# Clear all database connections.
+$ viola config:clear all
+
+# Or clear a specific connection.
+$ viola config:clear <connection-name>
+```
+
 
 ## Testing
 
