@@ -29,8 +29,8 @@
         "guzzlehttp/guzzle": "^7.7",
         "psr/http-client": "^1.0.2",
         "psr/http-factory": "^1.0.2",
-        "symfony/cache": "^6.3",
-        "symfony/console": "^6.2",
+        "symfony/cache": "^5.4.21|^6.2.10",
+        "symfony/console": "^5.4.21|^6.2.10",
         "symfony/dependency-injection": "^5.4.21|^6.2.10",
         "symfony/http-client": "^5.4.21|^6.2.10"
     },
