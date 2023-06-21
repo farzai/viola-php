@@ -4,55 +4,48 @@
 [![Tests](https://img.shields.io/github/actions/workflow/status/farzai/viola-php/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/farzai/viola-php/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/farzai/viola-php.svg?style=flat-square)](https://packagist.org/packages/farzai/viola-php)
 
-Viola is a PHP package that allows you to ask questions to ChatGPT API and get the answer with your own data.
+Viola is a PHP package that allows you to ask questions to ChatGPT and get the answer with your own data.
 
 ## Requirements
-```bash
-# Your PHP In local machine
-- PHP >= 8.0 (with ext-json)
 
-# ChatGPT API
-- OpenAI API key
-```
+- PHP >= 8.0
+- OpenAI Key
+
 
 ## Installation
 
 You can install the global package via composer:
 
 ```bash
-composer global require farzai/viola:dev-main
+$ composer global require farzai/viola
 ```
 
 ## Usage
 
 ```bash
-viola "Show me total sales for the last 3 days"
+$ viola ask "YOUR QUESTION"
+
+# Example
+$ viola ask "Show me who is admin in my company"
 ```
 
 Response:
-```bash
-For the last 3 days, total sales is 1000
-```
+```text
+Your admin in company:
 
-Or, you can use the `--table` option to display the result in a table format:
-
-```bash
-viola "Show me total sales for the last 3 days" --table
-```
-
-Response:
-```bash
-+---------------------+---------------------+
-| For the last 3 days | total               |
-+---------------------+---------------------+
-| 3 days              | 1000                |
-+---------------------+---------------------+
++---------------+
+| name          |
++---------------+
+| Pravit        |
++---------------+
+| Prayut        |
++---------------+
 ```
 
 ## Testing
 
 ```bash
-composer test
+$ composer test
 ```
 
 ## Changelog

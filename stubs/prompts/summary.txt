@@ -1,0 +1,5 @@
+Please summarize the results of the query and return the final answer.
+Don't retry listing the results.
+
+Results:
+:result:

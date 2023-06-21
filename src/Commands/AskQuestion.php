@@ -2,84 +2,80 @@
 
 namespace Farzai\Viola\Commands;
 
+use Farzai\Viola\Storage\CacheFilesystemStorage;
+use Farzai\Viola\Storage\DatabaseConnectionRepository;
 use Farzai\Viola\Viola;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 class AskQuestion extends Command
 {
     protected static $defaultName = 'ask';
 
-    private Viola $viola;
+    /**
+     * @var \Farzai\Viola\Contracts\StorageRepositoryInterface
+     */
+    private $storage;
 
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->viola = new Viola();
-    }
+    /**
+     * @var \Farzai\Viola\Contracts\DatabaseConnectionRepositoryInterface
+     */
+    private $databaseConfig;
 
     protected function configure()
     {
         $this
             ->setDescription('Ask a question to the ChatGPT')
-            ->addArgument('question', InputArgument::REQUIRED, 'The question to ask');
+            ->addArgument('question', InputArgument::REQUIRED, 'The question to ask')
+            ->setHelp("This command allows you to ask a question to the ChatGPT.\nYou may run `config:show` to see available connections for confirmation.");
+
+        $this->storage = new CacheFilesystemStorage();
+        $this->databaseConfig = new DatabaseConnectionRepository(new CacheFilesystemStorage());
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function handle(): int
     {
-        $question = $input->getArgument('question');
+        $question = $this->input->getArgument('question');
 
-        // if ($this->viola->getTokenStore()->getToken() === null) {
-        //     $accessToken = $this->ask(' API Token', $input, $output);
+        $this->ensureDatabaseIsConfigured();
 
-        //     if ($accessToken === null) {
-        //         $output->writeln('<error>API Token is required.</error>');
-        //         return Command::FAILURE;
-        //     }
+        $config = $this->getDatabaseConfig();
 
-        //     $this->viola->getTokenStore()->setToken($accessToken);
-        // }
-        $this->ensureAccessTokenIsValid($input, $output);
+        $viola = Viola::builder()
+            ->setDatabaseConfig($config['driver'], $config)
+            ->setApiKey($this->storage->get('api_key'))
+            ->build();
+
+        $response = $viola->ask($question);
+
+        $this->info($response->getAnswer());
+
+        $this->displayAsTable($response->getResults());
 
         return Command::SUCCESS;
     }
 
-    /**
-     * Ensure the access token is valid.
-     *
-     * @return void
-     */
-    private function ensureAccessTokenIsValid(InputInterface $input, OutputInterface $output)
+    private function ensureDatabaseIsConfigured()
     {
-        $currentToken = $this->viola->getTokenStore()->getToken();
+        $connections = $this->databaseConfig->all();
+        if (count($connections) === 0) {
+            $this->error("Database connection is not set.\nPlease run `viola config` to set the database connection.");
+            exit;
+        }
 
-        if ($currentToken === null) {
-            $accessToken = $this->ask(' API Token', $input, $output);
+        $currentName = $this->storage->get('database.current');
 
-            if ($accessToken === null) {
-                throw new \Exception('API Token is required.');
-            }
+        if (! $currentName) {
+            $currentName = $this->choice('Which connection do you want to use?', array_keys($connections), 0);
 
-            $this->viola->getTokenStore()->setToken($accessToken);
+            // Set the current connection.
+            $this->storage->set('database.current', $currentName);
         }
     }
 
-    /**
-     * Ask a question to the user.
-     *
-     * @return string
-     */
-    private function ask(string $question, InputInterface $input, OutputInterface $output)
+    private function getDatabaseConfig(): array
     {
-        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
-        $helper = $this->getHelper('question');
+        $connectionName = $this->storage->get('database.current');
 
-        return $helper->ask(
-            $input, $output, new Question("Enter {$question}: ")
-        );
+        return $this->databaseConfig->get($connectionName);
     }
 }

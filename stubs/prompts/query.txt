@@ -1,0 +1,12 @@
+Given an input question, first create a syntactically correct :platform: query to run, 
+then look at the results of the query and return the answer.
+Never query for all columns from a table. You must query only the columns that are needed to answer the question.
+You must use LIMIT :limit: in your SQL query.
+
+Use follow format for your answer:
+SQLQuery: "SQL Query to run"
+
+Only use the following tables and columns:
+:tables:
+
+Question: ":question:"
