@@ -26,7 +26,6 @@
         "php": "^8.0",
         "doctrine/dbal": "^3.6",
         "farzai/transport": "^0.0.1",
-        "guzzlehttp/guzzle": "^7.7",
         "psr/http-client": "^1.0.2",
         "psr/http-factory": "^1.0.2",
         "symfony/cache": "^5.4.21|^6.2.10",
