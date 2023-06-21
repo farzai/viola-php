@@ -6,12 +6,14 @@ use Exception;
 use Farzai\Transport\Response;
 use Farzai\Transport\TransportBuilder;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
+use Farzai\Viola\Contracts\PromptRepositoryInterface;
 use Farzai\Viola\Contracts\ViolaResponseInterface;
 use Farzai\Viola\Exceptions\SqlCommandUnsafe;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
+use Farzai\Viola\Storage\PromptRepository;
 
 class Viola
 {
@@ -40,6 +42,12 @@ class Viola
     private ClientInterface $transport;
 
     /**
+     * The prompt repository.
+     */
+    private PromptRepositoryInterface $prompt;
+
+    
+    /**
      * Create a new Viola builder.
      */
     public static function builder()
@@ -67,6 +75,8 @@ class Viola
             $builder->setLogger($logger);
         }
         $this->transport = $builder->build();
+
+        $this->prompt = new PromptRepository();
     }
 
     /**
@@ -97,7 +107,7 @@ class Viola
                 'content' => "SQLQuery: \"{$queryCommand}\"",
             ], [
                 'role' => 'user',
-                'content' => $this->buildPrompt('summary', [
+                'content' => $this->prompt->compile('summary', [
                     'result' => json_encode($results),
                 ]),
             ]);
@@ -119,7 +129,7 @@ class Viola
             $tables = $this->filterMatchingTables($question, $tables);
         }
 
-        return $this->buildPrompt('query', [
+        return $this->prompt->compile('query', [
             'tables' => $this->convertTablesToPrompt($tables),
             'platform' => $this->getPlatform(),
             'limit' => $this->config['limit'],
@@ -230,7 +240,7 @@ class Viola
         $response = $this->askOpenAi([
             [
                 'role' => 'system',
-                'content' => $this->buildPrompt('tables', [
+                'content' => $this->prompt->compile('tables', [
                     'tables' => $this->convertTablesToPrompt($tables),
                     'question' => $question,
                 ]),
@@ -266,7 +276,7 @@ class Viola
             body: [
                 'model' => $this->config['model'],
                 'messages' => $messages,
-                'max_tokens' => 100,
+                'max_tokens' => $this->config['max_tokens'],
                 'temperature' => $temperature,
                 'stop' => ['\n'],
             ],
@@ -323,20 +333,6 @@ class Viola
         }
 
         throw new Exception('Unexpected response from the server');
-    }
-
-    /**
-     * Get the prompt content.
-     */
-    private function buildPrompt(string $name, array $bindings = []): string
-    {
-        $content = file_get_contents(__DIR__."/../stubs/prompts/{$name}.txt");
-
-        foreach ($bindings as $key => $value) {
-            $content = str_replace(":{$key}:", (string) $value, $content);
-        }
-
-        return $content;
     }
 
     /**

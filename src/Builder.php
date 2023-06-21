@@ -30,8 +30,8 @@ class Builder
     private array $config = [
         // API Key from Open AI
         'api_key' => '',
-
         'model' => 'gpt-3.5-turbo-16k',
+        'max_tokens' => 100,
 
         // Limit the number of results
         'limit' => 50,
@@ -46,6 +46,7 @@ class Builder
             ],
         ],
 
+        // Tables and columns to exclude when fetching the schema to send to Open AI
         'except' => [
             'tables' => [
                 'migrations*',
