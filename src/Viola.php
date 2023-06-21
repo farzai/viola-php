@@ -9,11 +9,11 @@ use Farzai\Viola\Contracts\Database\ConnectionInterface;
 use Farzai\Viola\Contracts\PromptRepositoryInterface;
 use Farzai\Viola\Contracts\ViolaResponseInterface;
 use Farzai\Viola\Exceptions\SqlCommandUnsafe;
+use Farzai\Viola\Storage\PromptRepository;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
-use Farzai\Viola\Storage\PromptRepository;
 
 class Viola
 {
@@ -46,7 +46,6 @@ class Viola
      */
     private PromptRepositoryInterface $prompt;
 
-    
     /**
      * Create a new Viola builder.
      */
