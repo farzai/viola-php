@@ -2,18 +2,19 @@
 
 namespace Farzai\Viola;
 
-use Exception;
 use Farzai\Transport\Response;
 use Farzai\Transport\TransportBuilder;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
 use Farzai\Viola\Contracts\PromptRepositoryInterface;
 use Farzai\Viola\Contracts\ViolaResponseInterface;
 use Farzai\Viola\Exceptions\SqlCommandUnsafe;
+use Farzai\Viola\Exceptions\UnexpectedResponse;
 use Farzai\Viola\Storage\PromptRepository;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class Viola
 {
@@ -47,6 +48,11 @@ class Viola
     private PromptRepositoryInterface $prompt;
 
     /**
+     * The logger.
+     */
+    private LoggerInterface $logger;
+
+    /**
      * Create a new Viola builder.
      */
     public static function builder()
@@ -65,14 +71,14 @@ class Viola
     ) {
         $this->config = $config;
         $this->database = $database;
+        $this->logger = $logger ?? new NullLogger();
 
-        $builder = TransportBuilder::make();
+        $builder = TransportBuilder::make()->setLogger($this->logger);
+
         if ($client) {
             $builder->setClient($client);
         }
-        if ($logger) {
-            $builder->setLogger($logger);
-        }
+
         $this->transport = $builder->build();
 
         $this->prompt = new PromptRepository();
@@ -83,6 +89,8 @@ class Viola
      */
     public function ask(string $question): ViolaResponseInterface
     {
+        $this->logger->info(sprintf('Viola: Asking question "%s"', $question));
+
         $messages[] = [
             'role' => 'system',
             'content' => $this->buildSystemPrompt($question),
@@ -93,6 +101,8 @@ class Viola
         $queryCommand = $this->resolveQueryCommand($response->json());
 
         $this->ensureQueryCommandIsSafe($queryCommand);
+
+        $this->logger->info(sprintf('Viola: Query command "%s"', $queryCommand));
 
         $results = $this->database->performQuery($queryCommand);
 
@@ -125,7 +135,17 @@ class Viola
         $tables = $this->getTables();
 
         if (count($tables) > 5) {
+            $this->logger->warning(sprintf(
+                'Viola: The number of tables is %d, which is more than 5. This may cause the AI to perform poorly.',
+                count($tables)
+            ));
+
             $tables = $this->filterMatchingTables($question, $tables);
+
+            $this->logger->info(sprintf(
+                'Viola: After filtering, the number of tables is %d.',
+                count($tables)
+            ));
         }
 
         return $this->prompt->compile('query', [
@@ -313,7 +333,7 @@ class Viola
             return rtrim($matches[1], ';');
         }
 
-        throw new Exception('Unexpected response from the server');
+        throw new UnexpectedResponse();
     }
 
     /**
@@ -322,7 +342,7 @@ class Viola
     private function resolveAssistantMessage(array $json): string
     {
         if (! isset($json['choices'])) {
-            throw new Exception('Unexpected response from the server');
+            throw new UnexpectedResponse();
         }
 
         foreach ($json['choices'] as $choice) {
@@ -331,7 +351,7 @@ class Viola
             }
         }
 
-        throw new Exception('Unexpected response from the server');
+        throw new UnexpectedResponse();
     }
 
     /**

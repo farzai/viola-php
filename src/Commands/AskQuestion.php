@@ -5,7 +5,9 @@ namespace Farzai\Viola\Commands;
 use Farzai\Viola\Storage\CacheFilesystemStorage;
 use Farzai\Viola\Storage\DatabaseConnectionRepository;
 use Farzai\Viola\Viola;
+use Psr\Log\NullLogger;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 
 class AskQuestion extends Command
 {
@@ -26,7 +28,8 @@ class AskQuestion extends Command
         $this
             ->setDescription('Ask a question to the ChatGPT')
             ->addArgument('question', InputArgument::REQUIRED, 'The question to ask')
-            ->setHelp("This command allows you to ask a question to the ChatGPT.\nYou may run `config:show` to see available connections for confirmation.");
+            ->setHelp("This command allows you to ask a question to the ChatGPT.\nYou may run `config:show` to see available connections for confirmation.")
+            ->addOption('debug', 'd', null, 'Display the debug information');
 
         $this->storage = new CacheFilesystemStorage();
         $this->databaseConfig = new DatabaseConnectionRepository(new CacheFilesystemStorage());
@@ -43,6 +46,11 @@ class AskQuestion extends Command
         $viola = Viola::builder()
             ->setDatabaseConfig($config['driver'], $config)
             ->setApiKey($this->storage->get('api_key'))
+            ->setLogger(
+                $this->input->getOption('debug')
+                    ? new ConsoleLogger($this->output)
+                    : new NullLogger()
+            )
             ->build();
 
         $response = $viola->ask($question);
