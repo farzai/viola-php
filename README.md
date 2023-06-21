@@ -1,8 +1,8 @@
 # Viola PHP
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/farzai/viola-php.svg?style=flat-square)](https://packagist.org/packages/farzai/viola-php)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/farzai/viola.svg?style=flat-square)](https://packagist.org/packages/farzai/viola)
 [![Tests](https://img.shields.io/github/actions/workflow/status/farzai/viola-php/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/farzai/viola-php/actions/workflows/run-tests.yml)
-[![Total Downloads](https://img.shields.io/packagist/dt/farzai/viola-php.svg?style=flat-square)](https://packagist.org/packages/farzai/viola-php)
+[![Total Downloads](https://img.shields.io/packagist/dt/farzai/viola.svg?style=flat-square)](https://packagist.org/packages/farzai/viola)
 
 
 Viola is a PHP package that allows you to ask questions to ChatGPT and get the answer with your own data.
