@@ -9,5 +9,5 @@ interface AnswerResolverInterface
      *
      * @return mixed
      */
-    public function resolveQueryCommand(string $answer): string;
+    public function resolveQueryCommand(string $content): string;
 }

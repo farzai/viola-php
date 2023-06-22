@@ -2,17 +2,15 @@
 
 namespace Farzai\Viola;
 
-use Farzai\Transport\Response;
 use Farzai\Transport\TransportBuilder;
+use Farzai\Viola\Contracts\AnswerResolverInterface;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
 use Farzai\Viola\Contracts\PromptRepositoryInterface;
 use Farzai\Viola\Contracts\ViolaResponseInterface;
 use Farzai\Viola\Exceptions\QueryCommandUnsafe;
 use Farzai\Viola\Exceptions\UnexpectedResponse;
-use Farzai\Viola\Storage\PromptRepository;
-use GuzzleHttp\Psr7\Request;
+use Farzai\Viola\Resources\PromptRepository;
 use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -21,26 +19,12 @@ class Viola
     /**
      * The configuration.
      */
-    protected array $config;
+    private array $config;
 
     /**
-     * The database connection.
+     * The OpenAI Http client.
      */
-    protected ConnectionInterface $database;
-
-    /**
-     * Cache the tables and columns.
-     */
-    private $cache = [
-        'platform' => null,
-        'tables' => null,
-        'columns' => null,
-    ];
-
-    /**
-     * The transport.
-     */
-    private ClientInterface $transport;
+    private OpenAi\Client $openAi;
 
     /**
      * The prompt repository.
@@ -55,7 +39,21 @@ class Viola
     /**
      * The answer resolver.
      */
-    private OpenAI\AnswerResolver $anwserResolver;
+    private AnswerResolverInterface $anwserResolver;
+
+    /**
+     * The database connection.
+     */
+    private ConnectionInterface $database;
+
+    /**
+     * Cache the tables and columns.
+     */
+    private $cache = [
+        'platform' => null,
+        'tables' => null,
+        'columns' => null,
+    ];
 
     /**
      * Create a new Viola builder.
@@ -84,8 +82,7 @@ class Viola
             $builder->setClient($client);
         }
 
-        $this->transport = $builder->build();
-
+        $this->openAi = new OpenAi\Client($builder->build(), $this->config['api_key']);
         $this->prompt = new PromptRepository();
         $this->anwserResolver = new OpenAI\AnswerResolver();
     }
@@ -293,11 +290,7 @@ class Viola
      */
     private function askOpenAi(array $messages, float $temperature = 1.0)
     {
-        $psrRequest = $this->createRequest(
-            headers: [
-                'Authorization' => 'Bearer '.$this->config['api_key'],
-                'Content-Type' => 'application/json',
-            ],
+        return $this->openAi->sendCompletion(
             body: [
                 'model' => $this->config['model'],
                 'messages' => $messages,
@@ -306,18 +299,6 @@ class Viola
                 'stop' => ['\n'],
             ],
         );
-
-        $psrResponse = $this->transport->sendRequest($psrRequest);
-
-        return new Response($psrRequest, $psrResponse);
-    }
-
-    /**
-     * Create the request.
-     */
-    private function createRequest(array $headers, array $body): RequestInterface
-    {
-        return new Request('POST', 'https://api.openai.com/v1/chat/completions', $headers, json_encode($body));
     }
 
     /**
