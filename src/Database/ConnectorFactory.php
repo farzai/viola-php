@@ -7,6 +7,16 @@ use Farzai\Viola\Contracts\Database\ConnectorInterface;
 class ConnectorFactory
 {
     /**
+     * Get all supported drivers.
+     */
+    public static function getAvailableDrivers(): array
+    {
+        $config = require __DIR__.'/../../stubs/database.php';
+
+        return array_keys($config['drivers']);
+    }
+
+    /**
      * Create a connector instance based on the configuration.
      */
     public function create(string $driver): ConnectorInterface
@@ -19,15 +29,5 @@ class ConnectorFactory
                 "Unsupported driver [{$driver}]"
             )
         };
-    }
-
-    /**
-     * Get all supported drivers.
-     */
-    public static function getAvailableDrivers(): array
-    {
-        $config = require __DIR__.'/../../stubs/database.php';
-
-        return array_keys($config['drivers']);
     }
 }

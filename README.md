@@ -14,6 +14,19 @@ Viola is a PHP package that allows you to ask questions to ChatGPT and get the a
 - PHP >= 8.0
 - OpenAI Key
 
+## Supported Databases
+Currently, Viola supports the following databases:
+| Database | Supported |
+|----------|-----------|
+| MySQL    | ✅        |
+| PostgreSQL | ✅        |
+| SQL Server | ✅        |
+| SQLite | ❌        |
+| MongoDB | ❌        |
+
+Wait for it!
+I will add support for other databases in the future.
+
 ## Installation
 
 You can install the package globally via composer:

@@ -2,17 +2,15 @@
 
 namespace Farzai\Viola;
 
-use Farzai\Transport\Response;
 use Farzai\Transport\TransportBuilder;
+use Farzai\Viola\Contracts\AnswerResolverInterface;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
 use Farzai\Viola\Contracts\PromptRepositoryInterface;
 use Farzai\Viola\Contracts\ViolaResponseInterface;
-use Farzai\Viola\Exceptions\SqlCommandUnsafe;
+use Farzai\Viola\Exceptions\QueryCommandUnsafe;
 use Farzai\Viola\Exceptions\UnexpectedResponse;
-use Farzai\Viola\Storage\PromptRepository;
-use GuzzleHttp\Psr7\Request;
+use Farzai\Viola\Resources\PromptRepository;
 use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -21,26 +19,12 @@ class Viola
     /**
      * The configuration.
      */
-    protected array $config;
+    private array $config;
 
     /**
-     * The database connection.
+     * The OpenAI Http client.
      */
-    protected ConnectionInterface $database;
-
-    /**
-     * Cache the tables and columns.
-     */
-    private $cache = [
-        'platform' => null,
-        'tables' => null,
-        'columns' => null,
-    ];
-
-    /**
-     * The transport.
-     */
-    private ClientInterface $transport;
+    private OpenAi\Client $openAi;
 
     /**
      * The prompt repository.
@@ -51,6 +35,25 @@ class Viola
      * The logger.
      */
     private LoggerInterface $logger;
+
+    /**
+     * The answer resolver.
+     */
+    private AnswerResolverInterface $anwserResolver;
+
+    /**
+     * The database connection.
+     */
+    private ConnectionInterface $database;
+
+    /**
+     * Cache the tables and columns.
+     */
+    private $cache = [
+        'platform' => null,
+        'tables' => null,
+        'columns' => null,
+    ];
 
     /**
      * Create a new Viola builder.
@@ -79,9 +82,9 @@ class Viola
             $builder->setClient($client);
         }
 
-        $this->transport = $builder->build();
-
+        $this->openAi = new OpenAi\Client($builder->build(), $this->config['api_key']);
         $this->prompt = new PromptRepository();
+        $this->anwserResolver = new OpenAI\AnswerResolver();
     }
 
     /**
@@ -98,9 +101,9 @@ class Viola
 
         $response = $this->askOpenAi($messages);
 
-        $queryCommand = $this->resolveQueryCommand($response->json());
-
-        $this->ensureQueryCommandIsSafe($queryCommand);
+        $this->ensureQueryCommandIsSafe(
+            $queryCommand = $this->resolveQueryCommand($response->json())
+        );
 
         $this->logger->info(sprintf('Viola: Query command "%s"', $queryCommand));
 
@@ -110,6 +113,7 @@ class Viola
             return new ViolaResponse($response->json(), $queryCommand, $results);
         }
 
+        // If the number of results is less than 5, we will ask the AI to summarize the results.
         if (count($results) < 5) {
             array_push($messages, [
                 'role' => 'assistant',
@@ -244,7 +248,7 @@ class Viola
 
         foreach ($dangerousCommands as $command) {
             if (strpos(strtolower($query), $command) !== false) {
-                throw SqlCommandUnsafe::create($query);
+                throw QueryCommandUnsafe::create($query);
             }
         }
     }
@@ -266,9 +270,8 @@ class Viola
             ],
         ]);
 
-        $json = $response->json();
+        $names = explode(',', $this->getAssistantMessage($response->json()));
 
-        $names = explode(',', $this->resolveAssistantMessage($json));
         $names = array_map(fn ($table) => trim($table), $names);
         $names = array_unique($names);
 
@@ -287,11 +290,7 @@ class Viola
      */
     private function askOpenAi(array $messages, float $temperature = 1.0)
     {
-        $psrRequest = $this->createRequest(
-            headers: [
-                'Authorization' => 'Bearer '.$this->config['api_key'],
-                'Content-Type' => 'application/json',
-            ],
+        return $this->openAi->sendCompletion(
             body: [
                 'model' => $this->config['model'],
                 'messages' => $messages,
@@ -300,18 +299,6 @@ class Viola
                 'stop' => ['\n'],
             ],
         );
-
-        $psrResponse = $this->transport->sendRequest($psrRequest);
-
-        return new Response($psrRequest, $psrResponse);
-    }
-
-    /**
-     * Create the request.
-     */
-    private function createRequest(array $headers, array $body): RequestInterface
-    {
-        return new Request('POST', 'https://api.openai.com/v1/chat/completions', $headers, json_encode($body));
     }
 
     /**
@@ -321,31 +308,17 @@ class Viola
      */
     private function resolveQueryCommand(array $json)
     {
-        $content = $this->resolveAssistantMessage($json);
-
-        // Trim the content.
-        $content = trim($content);
-
-        // Remove the new line.
-        $content = implode(' ', array_map(fn ($line) => trim($line), explode("\n", $content)));
-
-        if (preg_match('/SQLQuery: "(.*?)"/im', $content, $matches)) {
-            return rtrim($matches[1], ';');
-        }
-
-        throw new UnexpectedResponse();
+        return $this->anwserResolver->resolveQueryCommand(
+            content: $this->getAssistantMessage($json),
+        );
     }
 
     /**
      * Resolve the assistant message from the given json.
      */
-    private function resolveAssistantMessage(array $json): string
+    private function getAssistantMessage(array $json): string
     {
-        if (! isset($json['choices'])) {
-            throw new UnexpectedResponse();
-        }
-
-        foreach ($json['choices'] as $choice) {
+        foreach ($json['choices'] ?? [] as $choice) {
             if ($choice['message']['role'] === 'assistant') {
                 return $choice['message']['content'];
             }

@@ -4,7 +4,7 @@ namespace Farzai\Viola\Exceptions;
 
 use Exception;
 
-class SqlCommandUnsafe extends Exception
+class QueryCommandUnsafe extends Exception
 {
     /**
      * @return static
