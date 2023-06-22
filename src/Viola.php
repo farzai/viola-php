@@ -7,7 +7,7 @@ use Farzai\Transport\TransportBuilder;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
 use Farzai\Viola\Contracts\PromptRepositoryInterface;
 use Farzai\Viola\Contracts\ViolaResponseInterface;
-use Farzai\Viola\Exceptions\SqlCommandUnsafe;
+use Farzai\Viola\Exceptions\QueryCommandUnsafe;
 use Farzai\Viola\Exceptions\UnexpectedResponse;
 use Farzai\Viola\Storage\PromptRepository;
 use GuzzleHttp\Psr7\Request;
@@ -53,6 +53,11 @@ class Viola
     private LoggerInterface $logger;
 
     /**
+     * The answer resolver.
+     */
+    private OpenAI\AnswerResolver $anwserResolver;
+
+    /**
      * Create a new Viola builder.
      */
     public static function builder()
@@ -82,6 +87,7 @@ class Viola
         $this->transport = $builder->build();
 
         $this->prompt = new PromptRepository();
+        $this->anwserResolver = new OpenAI\AnswerResolver();
     }
 
     /**
@@ -98,9 +104,9 @@ class Viola
 
         $response = $this->askOpenAi($messages);
 
-        $queryCommand = $this->resolveQueryCommand($response->json());
-
-        $this->ensureQueryCommandIsSafe($queryCommand);
+        $this->ensureQueryCommandIsSafe(
+            $queryCommand = $this->resolveQueryCommand($response->json())
+        );
 
         $this->logger->info(sprintf('Viola: Query command "%s"', $queryCommand));
 
@@ -110,6 +116,7 @@ class Viola
             return new ViolaResponse($response->json(), $queryCommand, $results);
         }
 
+        // If the number of results is less than 5, we will ask the AI to summarize the results.
         if (count($results) < 5) {
             array_push($messages, [
                 'role' => 'assistant',
@@ -244,7 +251,7 @@ class Viola
 
         foreach ($dangerousCommands as $command) {
             if (strpos(strtolower($query), $command) !== false) {
-                throw SqlCommandUnsafe::create($query);
+                throw QueryCommandUnsafe::create($query);
             }
         }
     }
@@ -266,9 +273,8 @@ class Viola
             ],
         ]);
 
-        $json = $response->json();
+        $names = explode(',', $this->getAssistantMessage($response->json()));
 
-        $names = explode(',', $this->resolveAssistantMessage($json));
         $names = array_map(fn ($table) => trim($table), $names);
         $names = array_unique($names);
 
@@ -321,31 +327,17 @@ class Viola
      */
     private function resolveQueryCommand(array $json)
     {
-        $content = $this->resolveAssistantMessage($json);
-
-        // Trim the content.
-        $content = trim($content);
-
-        // Remove the new line.
-        $content = implode(' ', array_map(fn ($line) => trim($line), explode("\n", $content)));
-
-        if (preg_match('/SQLQuery: "(.*?)"/im', $content, $matches)) {
-            return rtrim($matches[1], ';');
-        }
-
-        throw new UnexpectedResponse();
+        return $this->anwserResolver->resolveQueryCommand(
+            content: $this->getAssistantMessage($json),
+        );
     }
 
     /**
      * Resolve the assistant message from the given json.
      */
-    private function resolveAssistantMessage(array $json): string
+    private function getAssistantMessage(array $json): string
     {
-        if (! isset($json['choices'])) {
-            throw new UnexpectedResponse();
-        }
-
-        foreach ($json['choices'] as $choice) {
+        foreach ($json['choices'] ?? [] as $choice) {
             if ($choice['message']['role'] === 'assistant') {
                 return $choice['message']['content'];
             }
