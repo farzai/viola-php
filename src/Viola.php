@@ -2,7 +2,6 @@
 
 namespace Farzai\Viola;
 
-use Farzai\Transport\TransportBuilder;
 use Farzai\Viola\Contracts\AnswerResolverInterface;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
 use Farzai\Viola\Contracts\PromptRepositoryInterface;
@@ -72,17 +71,13 @@ class Viola
         ?ClientInterface $client,
         ?LoggerInterface $logger,
     ) {
+        $logger ??= new NullLogger();
+
         $this->config = $config;
         $this->database = $database;
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = $logger;
 
-        $builder = TransportBuilder::make()->setLogger($this->logger);
-
-        if ($client) {
-            $builder->setClient($client);
-        }
-
-        $this->openAi = new OpenAi\Client($builder->build(), $this->config['api_key']);
+        $this->openAi = new OpenAI\Client($client, $logger, $this->config['api_key']);
         $this->prompt = new PromptRepository();
         $this->anwserResolver = new OpenAI\AnswerResolver();
     }

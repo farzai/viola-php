@@ -2,10 +2,13 @@
 
 namespace Farzai\Viola\OpenAI;
 
+use Farzai\Transport\Contracts\ResponseInterface;
 use Farzai\Transport\Response;
 use Farzai\Transport\Transport;
+use Farzai\Transport\TransportBuilder;
 use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Log\LoggerInterface;
 
 class Client
 {
@@ -22,10 +25,20 @@ class Client
     /**
      * Client constructor.
      */
-    public function __construct(Transport $transport, string $apiKey)
+    public function __construct(?ClientInterface $client, ?LoggerInterface $logger, string $apiKey)
     {
-        $this->transport = $transport;
         $this->apiKey = $apiKey;
+
+        $builder = TransportBuilder::make();
+        if ($client) {
+            $builder->setClient($client);
+        }
+
+        if ($logger) {
+            $builder->setLogger($logger);
+        }
+
+        $this->transport = $builder->build();
     }
 
     public function sendCompletion(array $body): ResponseInterface
