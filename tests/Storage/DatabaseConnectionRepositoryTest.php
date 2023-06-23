@@ -44,12 +44,12 @@ it('should set new connection success', function () {
             ])
             ->getMock()
     );
-    
+
     $repository->set('farzai', [
         'host' => 'localhost',
         'port' => 3306,
         'database' => 'test',
-        'username' => 'root'
+        'username' => 'root',
     ]);
 });
 
