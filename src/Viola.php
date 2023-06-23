@@ -77,7 +77,7 @@ class Viola
         $this->database = $database;
         $this->logger = $logger;
 
-        $this->openAi = new OpenAi\Client($client, $logger, $this->config['api_key']);
+        $this->openAi = new OpenAI\Client($client, $logger, $this->config['api_key']);
         $this->prompt = new PromptRepository();
         $this->anwserResolver = new OpenAI\AnswerResolver();
     }
