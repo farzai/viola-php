@@ -2,6 +2,15 @@
 
 All notable changes to `viola-php` will be documented in this file.
 
+## 1.0.3 - 2023-06-23
+
+### What's Changed
+
+- Add more coverage by @parsilver in https://github.com/farzai/viola-php/pull/5
+- Extend expire time for cache by @parsilver in https://github.com/farzai/viola-php/pull/6
+
+**Full Changelog**: https://github.com/farzai/viola-php/compare/1.0.2...1.0.3
+
 ## 1.0.2 - 2023-06-22
 
 ### What's Changed
