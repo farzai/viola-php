@@ -38,7 +38,7 @@ class AskQuestion extends AbstractContextCommand
             ->build();
 
         $response = $viola
-            ->onlyResults(!!$this->input->getOption('only-result'))
+            ->onlyResults((bool) $this->input->getOption('only-result'))
             ->ask($question);
 
         $this->info($response->getAnswer());
