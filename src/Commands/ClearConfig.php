@@ -2,26 +2,10 @@
 
 namespace Farzai\Viola\Commands;
 
-use Farzai\Viola\Contracts\StorageRepositoryInterface;
-use Farzai\Viola\Storage\CacheFilesystemStorage;
 use Symfony\Component\Console\Input\InputArgument;
 
-class ClearConfig extends Command
+class ClearConfig extends AbstractContextCommand
 {
-    protected static $defaultName = 'config:clear';
-
-    private StorageRepositoryInterface $storage;
-
-    /**
-     * Create a new instance.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->storage = new CacheFilesystemStorage();
-    }
-
     protected function configure()
     {
         $this
@@ -48,18 +32,18 @@ class ClearConfig extends Command
 
                 $this->info('All connections cleared.');
 
-                return Command::SUCCESS;
+                return static::SUCCESS;
             }
 
             $this->info('Cancelled.');
 
-            return Command::SUCCESS;
+            return static::SUCCESS;
         }
 
         if (! $this->storage->has("database.connections.{$connection}")) {
             $this->error("Connection {$connection} does not exist.");
 
-            return Command::FAILURE;
+            return static::FAILURE;
         }
 
         if ($this->confirm("Are you sure you want to clear connection {$connection}?", false)) {
@@ -67,9 +51,9 @@ class ClearConfig extends Command
 
             $this->info("Connection {$connection} cleared.");
 
-            return Command::SUCCESS;
+            return static::SUCCESS;
         }
 
-        return Command::SUCCESS;
+        return static::SUCCESS;
     }
 }

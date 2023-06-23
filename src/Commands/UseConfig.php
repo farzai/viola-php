@@ -2,29 +2,16 @@
 
 namespace Farzai\Viola\Commands;
 
-use Farzai\Viola\Contracts\DatabaseConnectionRepositoryInterface;
-use Farzai\Viola\Contracts\StorageRepositoryInterface;
-use Farzai\Viola\Storage\CacheFilesystemStorage;
-use Farzai\Viola\Storage\DatabaseConnectionRepository;
 use Symfony\Component\Console\Input\InputArgument;
 
-class UseConfig extends Command
+class UseConfig extends AbstractContextCommand
 {
-    protected static $defaultName = 'use';
-
-    private StorageRepositoryInterface $storage;
-
-    private DatabaseConnectionRepositoryInterface $databaseConfig;
-
     protected function configure()
     {
         $this
             ->setDescription('Switch to a different database connection.')
             ->setHelp("This command allows you to switch to a different database connection.\nYou may run `config:show` to see available connections.")
             ->addArgument('connection', InputArgument::REQUIRED, 'The connection name to use.');
-
-        $this->storage = new CacheFilesystemStorage();
-        $this->databaseConfig = new DatabaseConnectionRepository(new CacheFilesystemStorage());
     }
 
     protected function handle(): int
@@ -41,7 +28,7 @@ class UseConfig extends Command
             $this->error("Connection [{$connectionName}] does not exist.");
             $this->error("Available connections: \n".implode("\n", array_map(fn ($name) => " - {$name}", $names)));
 
-            return Command::FAILURE;
+            return static::FAILURE;
         }
 
         $this->storage->set('database.current', $connectionName);
@@ -59,6 +46,6 @@ class UseConfig extends Command
             }
         }
 
-        return Command::SUCCESS;
+        return static::SUCCESS;
     }
 }

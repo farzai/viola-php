@@ -18,7 +18,7 @@ it('should send completion success', function () {
         ->shouldReceive('debug')
         ->getMock();
 
-    $client = new Client($psrClient, $psrLogger, 'secret');
+    $client = new Client('secret', $psrClient, $psrLogger);
 
     expect($client->sendCompletion([]))
         ->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);

@@ -7,18 +7,24 @@ if (file_exists(__DIR__.'/../../../autoload.php')) {
     require __DIR__.'/../vendor/autoload.php';
 }
 
+
+$storage = new Farzai\Viola\Storage\CacheFilesystemStorage();
+$databaseConfig = new Farzai\Viola\Storage\DatabaseConnectionRepository(
+    new Farzai\Viola\Storage\CacheFilesystemStorage()
+);
+
 $commands = [
-    Farzai\Viola\Commands\Config::class,
-    Farzai\Viola\Commands\ClearConfig::class,
-    Farzai\Viola\Commands\ShowConfig::class,
-    Farzai\Viola\Commands\UseConfig::class,
-    Farzai\Viola\Commands\AskQuestion::class,
+    new Farzai\Viola\Commands\Config('config', $storage, $databaseConfig),
+    new Farzai\Viola\Commands\ClearConfig('config:clear', $storage, $databaseConfig),
+    new Farzai\Viola\Commands\ShowConfig('config:show', $storage, $databaseConfig),
+    new Farzai\Viola\Commands\UseConfig('use', $storage, $databaseConfig),
+    new Farzai\Viola\Commands\AskQuestion('ask', $storage, $databaseConfig),
 ];
 
 $application = new Symfony\Component\Console\Application();
 
 foreach ($commands as $command) {
-    $application->add(new $command());
+    $application->add($command);
 }
 
 $application->run();

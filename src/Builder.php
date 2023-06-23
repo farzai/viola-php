@@ -91,7 +91,7 @@ class Builder
 
         if (! in_array($driver, $availableDrivers)) {
             throw new \InvalidArgumentException(
-                "Unsupported driver [{$driver}]"
+                "Unsupported driver [{$driver}]."
             );
         }
 
@@ -145,7 +145,7 @@ class Builder
         }
 
         if (! $this->connector) {
-            $this->connector = (new ConnectorFactory())->create($this->config['database']['driver']);
+            $this->connector = $this->createConnector($this->config['database']['driver']);
         }
 
         $connection = $this->connector->connect($this->config['database']['connection']);
@@ -156,5 +156,15 @@ class Builder
             $this->client,
             $this->logger,
         );
+    }
+
+    /**
+     * Create a connector instance based on the configuration.
+     */
+    private function createConnector(string $driver)
+    {
+        $connector = (new ConnectorFactory())->create($driver);
+
+        return $connector;
     }
 }

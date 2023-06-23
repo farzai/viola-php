@@ -2,26 +2,11 @@
 
 namespace Farzai\Viola\Commands;
 
-use Farzai\Viola\Contracts\DatabaseConnectionRepositoryInterface;
-use Farzai\Viola\Contracts\StorageRepositoryInterface;
-use Farzai\Viola\Storage\CacheFilesystemStorage;
-use Farzai\Viola\Storage\DatabaseConnectionRepository;
-
-class ShowConfig extends Command
+class ShowConfig extends AbstractContextCommand
 {
-    protected static $defaultName = 'config:show';
-
-    private StorageRepositoryInterface $storage;
-
-    private DatabaseConnectionRepositoryInterface $databaseConfig;
-
     protected function configure()
     {
-        $this
-            ->setDescription('Show current database connection and API key.');
-
-        $this->storage = new CacheFilesystemStorage();
-        $this->databaseConfig = new DatabaseConnectionRepository(new CacheFilesystemStorage());
+        $this->setDescription('Show current database connection and API key.');
     }
 
     protected function handle(): int
@@ -30,7 +15,7 @@ class ShowConfig extends Command
         if (! $apiKey) {
             $this->error('API key is not set.');
 
-            return Command::FAILURE;
+            return static::FAILURE;
         }
 
         $this->info("API Key: <comment>{$apiKey}</comment>");
@@ -49,6 +34,6 @@ class ShowConfig extends Command
             $this->info('Database Connection: <comment>Not set</comment>');
         }
 
-        return Command::SUCCESS;
+        return static::SUCCESS;
     }
 }

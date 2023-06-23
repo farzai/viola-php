@@ -2,26 +2,13 @@
 
 namespace Farzai\Viola\Commands;
 
-use Farzai\Viola\Contracts\DatabaseConnectionRepositoryInterface;
-use Farzai\Viola\Contracts\StorageRepositoryInterface;
 use Farzai\Viola\Database\ConnectorFactory;
-use Farzai\Viola\Storage\CacheFilesystemStorage;
-use Farzai\Viola\Storage\DatabaseConnectionRepository;
 
-class Config extends Command
+class Config extends AbstractContextCommand
 {
-    protected static $defaultName = 'config';
-
-    private StorageRepositoryInterface $storage;
-
-    private DatabaseConnectionRepositoryInterface $databaseConfig;
-
     protected function configure()
     {
         $this->setDescription('Config API key and database connection.');
-
-        $this->storage = new CacheFilesystemStorage();
-        $this->databaseConfig = new DatabaseConnectionRepository(new CacheFilesystemStorage());
     }
 
     protected function handle(): int
@@ -40,7 +27,7 @@ class Config extends Command
         } else {
             $this->error('API key is required.');
 
-            return Command::FAILURE;
+            return static::FAILURE;
         }
 
         $this->info('Setting up database connection...');
@@ -50,7 +37,7 @@ class Config extends Command
         if (! $connectionName || empty($connectionName)) {
             $this->error('Database connection name is required.');
 
-            return Command::FAILURE;
+            return static::FAILURE;
         }
 
         $connections = $this->databaseConfig->all();
@@ -62,7 +49,7 @@ class Config extends Command
                 if (! $this->confirm("Connection {$connectionName} already exists. Do you want to continue edit it?")) {
                     $this->info('Cancelled.');
 
-                    return Command::SUCCESS;
+                    return static::SUCCESS;
                 }
             }
         }
@@ -82,7 +69,7 @@ class Config extends Command
         if (! isset($stubConfig['drivers'][$driver])) {
             $this->error('Only support '.implode(', ', array_keys($stubConfig['drivers'])).' driver.');
 
-            return Command::FAILURE;
+            return static::FAILURE;
         }
 
         $stubConfig = $stubConfig['drivers'][$driver];
@@ -124,7 +111,7 @@ class Config extends Command
 
                 $this->info('Connection successful!, Platform: '.$platform);
 
-                return Command::SUCCESS;
+                return static::SUCCESS;
             } catch (\Exception $e) {
                 $this->error('Connection failed!, '.$e->getMessage());
             }
@@ -140,6 +127,6 @@ class Config extends Command
             }
         }
 
-        return Command::SUCCESS;
+        return static::SUCCESS;
     }
 }
