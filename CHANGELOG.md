@@ -2,6 +2,14 @@
 
 All notable changes to `viola-php` will be documented in this file.
 
+## 1.0.4 - 2023-06-23
+
+### What's Changed
+
+- Refactor code by @parsilver in https://github.com/farzai/viola-php/pull/7
+
+**Full Changelog**: https://github.com/farzai/viola-php/compare/1.0.3...1.0.4
+
 ## 1.0.3 - 2023-06-23
 
 ### What's Changed
