@@ -1,13 +1,13 @@
 # Viola PHP
 
+![Example CLI](assets/example.png)
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/farzai/viola.svg?style=flat-square)](https://packagist.org/packages/farzai/viola)
 [![Tests](https://img.shields.io/github/actions/workflow/status/farzai/viola-php/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/farzai/viola-php/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/farzai/viola.svg?style=flat-square)](https://packagist.org/packages/farzai/viola)
 
 
 Viola is a PHP package that allows you to ask questions to ChatGPT and get the answer with your own data.
-
-![Example CLI](assets/example.png)
 
 ## Requirements
 
@@ -129,8 +129,8 @@ use Farzai\Viola\Viola;
 $viola = Viola::builder()
     ->setApiKey(string $key)
     ->setDatabaseConfig(string $driver, array $databaseConfig)
-    ->setClient(\Psr\Http\Client\ClientInterface $client)
-    ->setLogger(\Psr\Log\LoggerInterface $logger)
+    ->setClient(\Psr\Http\Client\ClientInterface $client) // Optional
+    ->setLogger(\Psr\Log\LoggerInterface $logger) // Optional
     ->build();
 
 // Ask a question to ChatGPT.

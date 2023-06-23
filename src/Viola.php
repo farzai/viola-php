@@ -46,6 +46,11 @@ class Viola
     private ConnectionInterface $database;
 
     /**
+     * Set to true to only show the results without ask to ChatGPT again.
+     */
+    private $showOnlyResults = false;
+
+    /**
      * Cache the tables and columns.
      */
     private $cache = [
@@ -77,9 +82,19 @@ class Viola
         $this->database = $database;
         $this->logger = $logger;
 
-        $this->openAi = new OpenAI\Client($client, $logger, $this->config['api_key']);
+        $this->openAi = new OpenAI\Client($this->config['api_key'], $client, $logger);
         $this->prompt = new PromptRepository();
         $this->anwserResolver = new OpenAI\AnswerResolver();
+    }
+
+    /**
+     * Set to only show the results without ask to ChatGPT again.
+     */
+    public function onlyResults(bool $onlyResults = true)
+    {
+        $this->showOnlyResults = $onlyResults;
+
+        return $this;
     }
 
     /**
@@ -109,7 +124,7 @@ class Viola
         }
 
         // If the number of results is less than 5, we will ask the AI to summarize the results.
-        if (count($results) < 5) {
+        if (! $this->showOnlyResults && count($results) < 5) {
             array_push($messages, [
                 'role' => 'assistant',
                 'content' => "SQLQuery: \"{$queryCommand}\"",

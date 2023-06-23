@@ -10,7 +10,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
-abstract class Command extends SymfonyCommand
+abstract class AbstractCommand extends SymfonyCommand
 {
     protected InputInterface $input;
 

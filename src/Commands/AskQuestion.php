@@ -2,37 +2,21 @@
 
 namespace Farzai\Viola\Commands;
 
-use Farzai\Viola\Storage\CacheFilesystemStorage;
-use Farzai\Viola\Storage\DatabaseConnectionRepository;
 use Farzai\Viola\Viola;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 
-class AskQuestion extends Command
+class AskQuestion extends AbstractContextCommand
 {
-    protected static $defaultName = 'ask';
-
-    /**
-     * @var \Farzai\Viola\Contracts\StorageRepositoryInterface
-     */
-    private $storage;
-
-    /**
-     * @var \Farzai\Viola\Contracts\DatabaseConnectionRepositoryInterface
-     */
-    private $databaseConfig;
-
     protected function configure()
     {
         $this
             ->setDescription('Ask a question to the ChatGPT')
             ->addArgument('question', InputArgument::REQUIRED, 'The question to ask')
             ->setHelp("This command allows you to ask a question to the ChatGPT.\nYou may run `config:show` to see available connections for confirmation.")
+            ->addOption('only-result', null, null, 'Do not display the answer')
             ->addOption('debug', 'd', null, 'Display the debug information');
-
-        $this->storage = new CacheFilesystemStorage();
-        $this->databaseConfig = new DatabaseConnectionRepository(new CacheFilesystemStorage());
     }
 
     protected function handle(): int
@@ -53,13 +37,17 @@ class AskQuestion extends Command
             )
             ->build();
 
-        $response = $viola->ask($question);
+        $response = $viola
+            ->onlyResults(!!$this->input->getOption('only-result'))
+            ->ask($question);
 
         $this->info($response->getAnswer());
 
-        $this->displayAsTable($response->getResults());
+        if (count($response->getResults())) {
+            $this->displayAsTable($response->getResults());
+        }
 
-        return Command::SUCCESS;
+        return static::SUCCESS;
     }
 
     private function ensureDatabaseIsConfigured()

@@ -26,7 +26,7 @@ class ConnectorFactory
             'mysql' => new MySQL\Connector(),
             'sqlsrv' => new SqlServer\Connector(),
             default => throw new \InvalidArgumentException(
-                "Unsupported driver [{$driver}]"
+                "Unsupported driver [{$driver}]."
             )
         };
     }

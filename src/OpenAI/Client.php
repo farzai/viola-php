@@ -25,7 +25,7 @@ class Client
     /**
      * Client constructor.
      */
-    public function __construct(?ClientInterface $client, ?LoggerInterface $logger, string $apiKey)
+    public function __construct(string $apiKey, ?ClientInterface $client, ?LoggerInterface $logger)
     {
         $this->apiKey = $apiKey;
 
