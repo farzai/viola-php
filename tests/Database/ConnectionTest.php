@@ -49,3 +49,27 @@ it('should throw an exception when the query is invalid', function () {
 
     $connection->performQuery('SELECT * FROM users');
 })->throws(\Exception::class, "Error Processing Query: \nSELECT * FROM users\n\nInvalid Query");
+
+it('should get the correct columns from table successfully', function () {
+    $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
+    $schemaManager->expects($this->once())
+        ->method('listTableColumns')
+        ->willReturn([
+            new \Doctrine\DBAL\Schema\Column('id', new \Doctrine\DBAL\Types\IntegerType()),
+            new \Doctrine\DBAL\Schema\Column('name', new \Doctrine\DBAL\Types\StringType()),
+            new \Doctrine\DBAL\Schema\Column('email', new \Doctrine\DBAL\Types\StringType()),
+        ]);
+
+    $mysqlConnection = $this->createMock(\Doctrine\DBAL\Connection::class);
+    $mysqlConnection->expects($this->once())
+        ->method('createSchemaManager')
+        ->willReturn($schemaManager);
+
+    $connection = new DoctrineConnection($mysqlConnection);
+
+    expect($connection->getColumns('users'))->toBe([
+        'id' => 'integer',
+        'name' => 'string',
+        'email' => 'string',
+    ]);
+});

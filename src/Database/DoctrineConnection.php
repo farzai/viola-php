@@ -3,6 +3,7 @@
 namespace Farzai\Viola\Database;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Farzai\Viola\Contracts\Database\ConnectionInterface;
 
 final class DoctrineConnection implements ConnectionInterface
@@ -54,5 +55,29 @@ final class DoctrineConnection implements ConnectionInterface
     public function getTables(): array
     {
         return $this->connection->createSchemaManager()->listTableNames();
+    }
+
+    /**
+     * Get all columns with types in the given table.
+     *
+     * @return array<string, string>
+     */
+    public function getColumns(string $table): array
+    {
+        $columns = $this->connection->createSchemaManager()->listTableColumns($table);
+
+        $columnsWithType = [];
+
+        foreach ($columns as $column) {
+            $type = basename(str_replace('\\', '/', get_class($column->getType())));
+
+            // Remove the "Type" suffix from the type name.
+            $type = str_replace('Type', '', $type);
+            $type = strtolower($type);
+
+            $columnsWithType[$column->getName()] = $type;
+        }
+
+        return $columnsWithType;
     }
 }
