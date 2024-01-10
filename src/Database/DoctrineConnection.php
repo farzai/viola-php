@@ -55,22 +55,4 @@ final class DoctrineConnection implements ConnectionInterface
     {
         return $this->connection->createSchemaManager()->listTableNames();
     }
-
-    /**
-     * Get all columns with types in the given table.
-     *
-     * @return array<string, string>
-     */
-    public function getColumns(string $table): array
-    {
-        $columns = $this->connection->createSchemaManager()->listTableColumns($table);
-
-        $columnsWithType = [];
-
-        foreach ($columns as $column) {
-            $columnsWithType[$column->getName()] = $column->getType()->getName();
-        }
-
-        return $columnsWithType;
-    }
 }

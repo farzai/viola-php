@@ -6,8 +6,6 @@ interface StorageRepositoryInterface
 {
     /**
      * Get the value of the given key.
-     *
-     * @param  mixed  $default
      */
     public function get(string $key, mixed $default = null): mixed;
 
