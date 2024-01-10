@@ -5,21 +5,24 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 
 it('should send completion success', function () {
-    $psrClient = \Mockery::mock(ClientInterface::class)
-        ->shouldReceive('sendRequest')->once()
-        ->andReturn(\Mockery::mock(\Psr\Http\Message\ResponseInterface::class)
-            ->shouldReceive('getStatusCode')
-            ->andReturn(200)
-            ->getMock()
-        )
-        ->getMock();
+    $psrResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+    $psrResponse->expects($this->once())
+        ->method('getStatusCode')
+        ->willReturn(200);
 
-    $psrLogger = \Mockery::mock(LoggerInterface::class)
-        ->shouldReceive('debug')
-        ->getMock();
+    $psrClient = $this->createMock(ClientInterface::class);
+    $psrClient->expects($this->once())
+        ->method('sendRequest')
+        ->willReturn($psrResponse);
+
+    $psrLogger = $this->createMock(LoggerInterface::class);
+    $psrLogger->expects($this->once())
+        ->method('info');
 
     $client = new Client('secret', $psrClient, $psrLogger);
 
-    expect($client->sendCompletion([]))
-        ->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);
+    $response = $client->sendCompletion([]);
+
+    expect($response)->toBeInstanceOf(\Farzai\Transport\Contracts\ResponseInterface::class);
+    expect($response->statusCode())->toBe(200);
 });
