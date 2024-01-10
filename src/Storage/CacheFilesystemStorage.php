@@ -26,6 +26,7 @@ class CacheFilesystemStorage implements StorageRepositoryInterface
     public function get(string $key, mixed $default = null): mixed
     {
         $item = $this->cache->getItem($key);
+
         if ($item->isHit()) {
             return $item->get();
         }
@@ -40,10 +41,9 @@ class CacheFilesystemStorage implements StorageRepositoryInterface
     {
         $item = $this->cache->getItem($key);
 
-        $item->set($value);
-
-        // 5 years
-        $item->expiresAfter(60 * 60 * 24 * 365 * 5);
+        $item
+            ->set($value)
+            ->expiresAfter(new \DateInterval('P5Y'));
 
         $this->cache->save($item);
     }

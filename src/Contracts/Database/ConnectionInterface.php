@@ -20,4 +20,11 @@ interface ConnectionInterface
      * @return array<string>
      */
     public function getTables(): array;
+
+    /**
+     * Get all columns with types in the given table.
+     *
+     * @return array<string, string>
+     */
+    public function getColumns(string $table): array;
 }
