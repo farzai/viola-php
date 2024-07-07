@@ -12,9 +12,7 @@ final class ViolaResponse implements ViolaResponseInterface
     public function __construct(
         private array $body,
         private ?string $query,
-        private ?array $results)
-    {
-    }
+        private ?array $results) {}
 
     /**
      * Return the answer.

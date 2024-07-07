@@ -8,9 +8,9 @@ if (file_exists(__DIR__.'/../../../autoload.php')) {
 }
 
 
-$storage = new Farzai\Viola\Storage\CacheFilesystemStorage();
+$storage = new Farzai\Viola\Storage\TemporaryFilesystemStorage();
 $databaseConfig = new Farzai\Viola\Storage\DatabaseConnectionRepository(
-    new Farzai\Viola\Storage\CacheFilesystemStorage()
+    new Farzai\Viola\Storage\TemporaryFilesystemStorage()
 );
 
 $commands = [
